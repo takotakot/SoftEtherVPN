@@ -5736,8 +5736,6 @@ SSL_PIPE *NewSslPipeEx(bool server_mode, X *x, K *k, DH_CTX *dh, bool verify_pee
 	{
 		if (server_mode)
 		{
-			SSL_CTX_set_ssl_version(ssl_ctx, SSLv23_server_method());
-
 #ifdef	SSL_OP_NO_SSLv3
 			SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv3);
 #endif	// SSL_OP_NO_SSLv3
@@ -5752,10 +5750,6 @@ SSL_PIPE *NewSslPipeEx(bool server_mode, X *x, K *k, DH_CTX *dh, bool verify_pee
 			{
 				SSL_CTX_set_tmp_dh(ssl_ctx, dh->dh);
 			}
-		}
-		else
-		{
-			SSL_CTX_set_ssl_version(ssl_ctx, SSLv23_client_method());
 		}
 
 		if (verify_peer)
@@ -11884,8 +11878,6 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 	{
 		if (sock->ServerMode)
 		{
-			SSL_CTX_set_ssl_version(ssl_ctx, SSLv23_server_method());
-
 #ifdef	SSL_OP_NO_SSLv3
 			SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv3);
 #endif	// SSL_OP_NO_SSLv3
@@ -11924,8 +11916,6 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 		}
 		else
 		{
-			SSL_CTX_set_ssl_version(ssl_ctx, SSLv23_client_method());
-
 #ifdef	SSL_OP_NO_SSLv3
 			SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv3);
 #endif	// SSL_OP_NO_SSLv3
@@ -16600,6 +16590,15 @@ struct ssl_ctx_st *NewSSLCtx(bool server_mode)
 	SSL_CTX_set_ecdh_auto(ctx, 1);
 #endif	// SSL_CTX_set_ecdh_auto
 
+	if (server_mode)
+	{
+		SSL_CTX_set_ssl_version(ctx, SSLv23_server_method());
+	}
+	else
+	{
+		SSL_CTX_set_ssl_version(ctx, SSLv23_client_method());
+	}
+
 	return ctx;
 }
 
@@ -16729,8 +16728,6 @@ TOKEN_LIST *GetCipherList()
 	{
 		return ciphers;
 	}
-
-	SSL_CTX_set_ssl_version(ctx, SSLv23_server_method());
 
 #ifdef	SSL_OP_NO_SSLv3
 	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv3);
