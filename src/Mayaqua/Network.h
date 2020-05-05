@@ -1438,6 +1438,7 @@ void RefreshLocalMacAddressList();
 
 struct ssl_ctx_st *NewSSLCtx(bool server_mode);
 void FreeSSLCtx(struct ssl_ctx_st *ctx);
+UINT GetOSSecurityLevel();
 
 void SetCurrentDDnsFqdn(char *name);
 void GetCurrentDDnsFqdn(char *name, UINT size);
