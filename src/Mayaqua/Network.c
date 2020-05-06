@@ -16610,7 +16610,7 @@ UINT GetOSSecurityLevel()
 	UINT security_level = 0;
 	struct ssl_ctx_st *ctx = SSL_CTX_new(SSLv23_method());
 
-#if OPENSSL_VERSION_NUMBER >= 0x1010100fL
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	security_level = SSL_CTX_get_security_level(ctx);
 #endif
 
