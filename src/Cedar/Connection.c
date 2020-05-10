@@ -2925,7 +2925,6 @@ void ConnectionAccept(CONNECTION *c)
 	IPToStr(tmp, sizeof(tmp), &s->RemoteIP);
 
 	SLog(c->Cedar, "LS_CONNECTION_START_1", tmp, s->RemoteHostname, (IS_SPECIAL_PORT(s->RemotePort) ? 0 : s->RemotePort), c->Name);
-	SLog(c->Cedar, "LS_CONNECTION_START_1", tmp, s->RemoteHostname, (IS_SPECIAL_PORT(s->RemotePort) ? 0 : s->RemotePort), c->Name);
 
 	// Timeout setting
 	initial_timeout += GetMachineRand() % (CONNECTING_TIMEOUT / 2);
@@ -2948,10 +2947,10 @@ void ConnectionAccept(CONNECTION *c)
 	// Specify the encryption algorithm
 	Lock(c->Cedar->lock);
 	{
-		SLog(c->Cedar, "LS_CONNECTION_START_1", tmp, s->RemoteHostname, (IS_SPECIAL_PORT(s->RemotePort) ? 0 : s->RemotePort), "set algo");
+		SLog2(c->Cedar, L"set algo");
 		if (c->Cedar->CipherList != NULL)
 		{
-			SLog(c->Cedar, "LS_CONNECTION_START_1", tmp, s->RemoteHostname, (IS_SPECIAL_PORT(s->RemotePort) ? 0 : s->RemotePort), c->Cedar->CipherList);
+			SLog2(c->Cedar, L"list: %S", c->Cedar->CipherList);
 			SetWantToUseCipher(s, c->Cedar->CipherList);
 		}
 
