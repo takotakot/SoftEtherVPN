@@ -540,7 +540,7 @@ void SLog3(char *name)
 	IO *io;
 	io = FileOpenW(L"/usr/local/vpnserver/debug.log", true);
 
-	if (FileWrite(io, name, strlen(name)) == false)
+	if (FileWrite(io, "name", strlen("name")) == false)
 	{
 		FileCloseEx(io, true);
 		// If it fails to write to the file,
