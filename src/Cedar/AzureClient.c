@@ -60,7 +60,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 					{
 						client_port = PackGetInt(p, "client_port");
 						server_port = PackGetInt(p, "server_port");
-						SLog2(ac->Cedar, L"AcWaitForRequest: sess %S %r:%u (srv %r:%u)", session_id, &client_ip, client_port, &server_ip, server_port);
+						SLog2(ac->Cedar, L"AcWaitForRequest: sess %r %r:%u (srv %r:%u)", session_id, &client_ip, client_port, &server_ip, server_port);
 
 						if (client_port != 0 && server_port != 0)
 						{
@@ -93,6 +93,19 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 
 								if (StartSSLEx(ns, NULL, NULL, 0, NULL))
 								{
+									
+									{
+										char server_cert_hash_str[MAX_SIZE];
+										UCHAR server_cert_hash[SHA1_SIZE];
+										SLog2(ac->Cedar, L"AcWaitForRequest:StartSSLEx done %S %S %S", ns->CipherName, ns->SecureMode ? "SecureMode" : "NOTSecureMode", ns->ServerMode ? "Server" : "Client");
+
+										Zero(server_cert_hash, sizeof(server_cert_hash));
+										GetXDigest(ns->LocalX, server_cert_hash, true);
+
+										BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str),
+											server_cert_hash, SHA1_SIZE);
+										SLog2(ac->Cedar, L"AcWaitForRequest:ns->LocalX %S", server_cert_hash_str);
+									}
 									// Check certification
 									char server_cert_hash_str[MAX_SIZE];
 									UCHAR server_cert_hash[SHA1_SIZE];
@@ -104,6 +117,8 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 									BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str),
 										server_cert_hash, SHA1_SIZE);
 									SLog2(ac->Cedar, L"AcWaitForRequest:server_cert_hash_str %S", server_cert_hash_str);
+
+									SLog2(ac->Cedar, L"ConnectionAccept ssl, up, pd, %S, %S, %S", ns->SslVersion, ns->UnderlayProtocol, ns->ProtocolDetails);
 
 									if (IsEmptyStr(ac->DDnsStatusCopy.AzureCertHash) || StrCmpi(server_cert_hash_str, ac->DDnsStatusCopy.AzureCertHash) == 0
 										 || StrCmpi(server_cert_hash_str, ac->DDnsStatus.AzureCertHash) == 0)
