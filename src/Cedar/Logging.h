@@ -129,6 +129,7 @@ char *TcpFlagStr(UCHAR flag);
 void SiSetDefaultLogSetting(HUB_LOG *g);
 void DebugLog(CEDAR *c, char *fmt, ...);
 void SLog(CEDAR *c, char *name, ...);
+void SLog2(CEDAR *c, char *name, ...);
 void WriteHubLog(HUB *h, wchar_t *str);
 void HLog(HUB *h, char *name, ...);
 void NLog(VH *v, char *name, ...);
