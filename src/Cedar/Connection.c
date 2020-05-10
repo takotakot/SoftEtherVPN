@@ -2977,7 +2977,6 @@ void ConnectionAccept(CONNECTION *c)
 	FreeK(k);
 
 	SLog(c->Cedar, "LS_SSL_START", c->Name, s->CipherName);
-	SLog(c->Cedar, "LS_SSL_START", c->Name, s->CipherName);
 
 	Copy(c->CToken_Hash, ctoken_hash, SHA1_SIZE);
 
