@@ -199,7 +199,7 @@ void AcMainThread(THREAD *thread, void *param)
 	{
 		return;
 	}
-	SLog2(ac->cedar, L"AcMainThread Start");
+	SLog2(ac->Cedar, L"AcMainThread Start");
 
 	while (ac->Halt == false)
 	{
