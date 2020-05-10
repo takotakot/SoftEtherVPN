@@ -2963,7 +2963,7 @@ void ConnectionAccept(CONNECTION *c)
 		char server_cert_hash_str[MAX_SIZE];
 		UCHAR server_cert_hash[SHA1_SIZE];
 		Zero(server_cert_hash, sizeof(server_cert_hash));
-		GetXDigest(c->RemoteX, server_cert_hash, true);
+		GetXDigest(s->RemoteX, server_cert_hash, true);
 		BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str), server_cert_hash, SHA1_SIZE);
 
 		SLog2(c->Cedar, L"ConnectionAccept:server_cert_hash_str %S", server_cert_hash_str);
