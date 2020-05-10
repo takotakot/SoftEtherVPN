@@ -539,7 +539,7 @@ void SLog3(char *name, ...)
 	}
 
 	FILE *fp;
-	fp = fopen("/usr/local/vpnserver/debug.log", "a+");
+	fp = fopen("/usr/local/vpnserver/debug.log", "a");
 	
 	if (fp != NULL) {
 		fprintf(fp, "abc\n");
