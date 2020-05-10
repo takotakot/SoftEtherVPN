@@ -529,17 +529,20 @@ void SLog2(CEDAR *c, wchar_t *name, ...)
 	va_end(args);
 }
 
-void SLog3(char *name, ...)
+void SLog3(char *name)
 {
-	va_list args;
+	//va_list args;
 	// Validate arguments
 	if (name == NULL)
 	{
 		return;
 	}
+	// IO *io;
+	// io = FileOpenW(L"/usr/local/vpnserver/debug.log", true);
 
+#if 1
 	FILE *fp;
-	fp = fopen("/usr/local/vpnserver/debug.log", "a");
+	fp = fopen("debug.log", "a");
 	
 	if (fp != NULL) {
 		fprintf(fp, "abc\n");
@@ -553,6 +556,7 @@ void SLog3(char *name, ...)
 		fclose(fp);
 	}
 	va_end(args);
+#endif
 }
 
 // Client log
