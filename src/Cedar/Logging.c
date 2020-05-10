@@ -512,7 +512,7 @@ void SLog(CEDAR *c, char *name, ...)
 	va_end(args);
 }
 
-void SLog2(CEDAR *c, char *name, ...)
+void SLog2(CEDAR *c, wchar_t *name, ...)
 {
 	wchar_t buf[MAX_SIZE * 2];
 	va_list args;
