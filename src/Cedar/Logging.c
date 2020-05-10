@@ -537,10 +537,18 @@ void SLog3(char *name)
 	{
 		return;
 	}
-	// IO *io;
-	// io = FileOpenW(L"/usr/local/vpnserver/debug.log", true);
+	IO *io;
+	io = FileOpenW(L"/usr/local/vpnserver/debug.log", true);
 
-#if 1
+	if (FileWrite(io, name, strlen(name)) == false)
+	{
+		FileCloseEx(io, true);
+		// If it fails to write to the file,
+		// erase the buffer and give up
+		ClearBuf(buffer);
+		io = NULL;
+	}
+#if 0
 	FILE *fp;
 	fp = fopen("/usr/local/vpnserver/debug.log", "a");
 	
