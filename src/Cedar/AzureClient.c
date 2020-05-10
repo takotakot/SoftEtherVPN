@@ -252,12 +252,13 @@ void AcMainThread(THREAD *thread, void *param)
 					UINT port = AZURE_SERVER_PORT;
 
 					Debug("VPN Azure: Connecting to %s...\n", st.CurrentAzureIp);
-					WriteServerLog(ac->Cedar, "AZURE: Connected to the relay server.\n");
+					SLog2(ac->Cedar, "AZURE: VPN Azure: Connecting to %s...\n", st.CurrentAzureIp);
 
 					if (ParseHostPort(st.CurrentAzureIp, &host, &port, AZURE_SERVER_PORT))
 					{
 						if (st.InternetSetting.ProxyType == PROXY_DIRECT)
 						{
+							SLog2(ac->Cedar, "AZURE: ConnectEx2\n");
 							s = ConnectEx2(host, port, 0, (bool *)&ac->Halt);
 						}
 						else
@@ -271,6 +272,7 @@ void AcMainThread(THREAD *thread, void *param)
 							UINT64 established_tick = 0;
 
 							Debug("VPN Azure: Connected.\n");
+							SLog2(ac->Cedar, "AZURE: VPN Azure: Connected.");
 
 							SetTimeout(s, AZURE_PROTOCOL_CONTROL_TIMEOUT_DEFAULT);
 
