@@ -312,6 +312,7 @@ void AcMainThread(THREAD *thread, void *param)
 								BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str), server_cert_hash, SHA1_SIZE);
 
 								SLog2(ac->Cedar, L"AcMainThread s->LocalX %S", server_cert_hash_str);
+								SLog3(L"ConnectEx2: %S %u\n");
 							}
 							SLog2(ac->Cedar, L"AcMainThread ConnectEx2 End: %S %S %S", ac->Cedar->CipherList, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
 							SLog2(ac->Cedar, L"AcMainThread ssl, up, pd, %S, %S, %S", s->SslVersion, s->UnderlayProtocol, s->ProtocolDetails);
