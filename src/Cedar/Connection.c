@@ -2958,7 +2958,7 @@ void ConnectionAccept(CONNECTION *c)
 		k = CloneK(c->Cedar->ServerK);
 	}
 	Unlock(c->Cedar->lock);
-	SLog2(c->Cedar, L"ConnectionAccept mode: %S %S", s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
+	SLog2(c->Cedar, L"ConnectionAccept mode: %S %S %S", c->Name, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
 
 	// Start the SSL communication
 	Copy(&s->SslAcceptSettings, &c->Cedar->SslAcceptSettings, sizeof(SSL_ACCEPT_SETTINGS));

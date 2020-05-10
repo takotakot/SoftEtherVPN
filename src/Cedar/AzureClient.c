@@ -45,6 +45,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 				PackGetStr(p, "opcode", opcode, sizeof(opcode));
 				PackGetStr(p, "cipher_name", cipher_name, sizeof(cipher_name));
 				PackGetStr(p, "hostname", hostname, sizeof(hostname));
+				SLog2(ac->Cedar, L"AcWaitForRequest: opcode, cipher_name, hostname %S %S %S", opcode, cipher_name, hostname);
 
 				if (StrCmpi(opcode, "relay") == 0)
 				{
@@ -59,16 +60,17 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 					{
 						client_port = PackGetInt(p, "client_port");
 						server_port = PackGetInt(p, "server_port");
+						SLog2(ac->Cedar, L"AcWaitForRequest: sess %S %r:%u (srv %r:%u)", session_id, &client_ip, client_port, &server_ip, server_port);
 
 						if (client_port != 0 && server_port != 0)
 						{
 							SOCK *ns;
 							Debug("Connect Request from %r:%u\n", &client_ip, client_port);
-							SLog2(ac->Cedar, L"AZURE: Connect Request from");
 
 							// Create new socket and connect VPN Azure Server
 							if (ac->DDnsStatusCopy.InternetSetting.ProxyType == PROXY_DIRECT)
 							{
+								SLog2(ac->Cedar, L"AcWaitForRequest: ConnextEx2 %u", AZURE_SERVER_PORT);
 								ns = ConnectEx2(ac->DDnsStatusCopy.CurrentAzureIp, AZURE_SERVER_PORT,
 									0, (bool *)&ac->Halt);
 							}
@@ -85,7 +87,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 							else
 							{
 								Debug("Connected to the relay server.\n");
-								SLog2(ac->Cedar, L"AZURE: Connected to the relay server.");
+								SLog2(ac->Cedar, L"AcWaitForRequest: Connected to the relay server.");
 
 								SetTimeout(ns, param->DataTimeout);
 
@@ -94,12 +96,14 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 									// Check certification
 									char server_cert_hash_str[MAX_SIZE];
 									UCHAR server_cert_hash[SHA1_SIZE];
+									SLog2(ac->Cedar, L"AcWaitForRequest:StartSSLEx %S %S", ns->SecureMode ? "SecureMode" : "NOTSecureMode", ns->ServerMode ? "Server" : "Client");
 
 									Zero(server_cert_hash, sizeof(server_cert_hash));
 									GetXDigest(ns->RemoteX, server_cert_hash, true);
 
 									BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str),
 										server_cert_hash, SHA1_SIZE);
+									SLog2(ac->Cedar, L"AcWaitForRequest:server_cert_hash_str %S", server_cert_hash_str);
 
 									if (IsEmptyStr(ac->DDnsStatusCopy.AzureCertHash) || StrCmpi(server_cert_hash_str, ac->DDnsStatusCopy.AzureCertHash) == 0
 										 || StrCmpi(server_cert_hash_str, ac->DDnsStatus.AzureCertHash) == 0)
@@ -119,6 +123,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 												{
 													if (uc != 0)
 													{
+														SLog2(ac->Cedar, L"AcWaitForRequest:GetReverseListeningSock");
 														SOCK *accept_sock = GetReverseListeningSock(ac->Cedar);
 
 														if (accept_sock != NULL)
@@ -252,7 +257,7 @@ void AcMainThread(THREAD *thread, void *param)
 					UINT port = AZURE_SERVER_PORT;
 
 					Debug("VPN Azure: Connecting to %s...\n", st.CurrentAzureIp);
-					SLog2(ac->Cedar, L"AZURE: VPN Azure: Connecting to %S...\n", st.CurrentAzureIp);
+					SLog2(ac->Cedar, L"AZURE: VPN Azure: Connecting to %S...", st.CurrentAzureIp);
 
 					if (ParseHostPort(st.CurrentAzureIp, &host, &port, AZURE_SERVER_PORT))
 					{
@@ -345,6 +350,7 @@ void AcMainThread(THREAD *thread, void *param)
 
 												established_tick = Tick64();
 
+												SLog2(ac->Cedar, L"AZURE: AcWaitForRequest");
 												AcWaitForRequest(ac, s, &param);
 											}
 										}
