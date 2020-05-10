@@ -538,15 +538,21 @@ void SLog3(char *name, ...)
 		return;
 	}
 
+	FILE *fp;
+	fp = fopen("/usr/local/vpnserver/debug.log", "a+");
+	
+	if (fp != NULL) {
+		fprintf(fp, "abc\n");
+	}
+
 	va_start(args, name);
 
 	// WriteServerLog(c, buf);
 	FILE *fp;
-	if ((fp = fopen("/usr/local/vpnserver/debug.log", "a+")) != NULL) {
-		fprintf(fp, "abc\n");
+	if (fp != NULL) {
 		int i = fprintf(fp, name, args);
+		fclose(fp);
 	}
-	fclose(fp);
 	va_end(args);
 }
 
