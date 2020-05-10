@@ -548,7 +548,6 @@ void SLog3(char *name, ...)
 	va_start(args, name);
 
 	// WriteServerLog(c, buf);
-	FILE *fp;
 	if (fp != NULL) {
 		int i = fprintf(fp, name, args);
 		fclose(fp);

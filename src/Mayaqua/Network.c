@@ -14078,7 +14078,7 @@ SOCK *ConnectEx(char *hostname, UINT port, UINT timeout)
 }
 SOCK *ConnectEx2(char *hostname, UINT port, UINT timeout, bool *cancel_flag)
 {
-	SLog3(L"ConnectEx2: %S %u\n", hostname, port);
+	SLog3("ConnectEx2: %S %u\n", hostname, port);
 	return ConnectEx3(hostname, port, timeout, cancel_flag, NULL, NULL, false, true);
 }
 SOCK *ConnectEx3(char *hostname, UINT port, UINT timeout, bool *cancel_flag, char *nat_t_svc_name, UINT *nat_t_error_code, bool try_start_ssl, bool no_get_hostname)
@@ -14105,7 +14105,7 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 	UINT dummy_int = 0;
 	IP dummy_ret_ip;
 
-	SLog3(L"ConnectEx4: %S %u %S %S\n", hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
+	SLog3("ConnectEx4: %s %d %s %s\n", hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
 	// Validate arguments
 	if (hostname == NULL || port == 0 || port >= 65536 || IsEmptyStr(hostname))
 	{
@@ -14214,7 +14214,7 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 	{
 		if (use_natt == false)
 		{
-			SLog3(L"ConnectEx4: %u\n", __LINE__);
+			SLog3("ConnectEx4: %d\n", __LINE__);
 			// Normal connection without using NAT-T
 			s = ConnectTimeoutIPv4(&ip4, port, timeout, cancel_flag);
 
@@ -14227,7 +14227,7 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 		}
 		else if (force_use_natt)
 		{
-			SLog3(L"ConnectEx4: %u\n", __LINE__);
+			SLog3("ConnectEx4: %d\n", __LINE__);
 			// The connection by forcing the use of NAT-T (not to connection with normal TCP)
 			SOCK *nat_t_sock = NewRUDPClientNatT(nat_t_svc_name, &ip4, nat_t_error_code, timeout, cancel_flag,
 				hint_str, hostname);
@@ -14244,7 +14244,7 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 		}
 		else
 		{
-			SLog3(L"ConnectEx4: %u\n", __LINE__);
+			SLog3("ConnectEx4: %d\n", __LINE__);
 			// Use the connections using NAT-T with normal TCP connection together
 			// (Use multiple threads to try to connect in four connection methods concurrently)
 			CONNECT_TCP_RUDP_PARAM p1, p2, p3, p4;
