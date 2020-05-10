@@ -64,6 +64,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 						{
 							SOCK *ns;
 							Debug("Connect Request from %r:%u\n", &client_ip, client_port);
+							SLog("AZURE: Connect Request from %r:%u\n", &client_ip, client_port);
 
 							// Create new socket and connect VPN Azure Server
 							if (ac->DDnsStatusCopy.InternetSetting.ProxyType == PROXY_DIRECT)
@@ -84,6 +85,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 							else
 							{
 								Debug("Connected to the relay server.\n");
+								SLog("AZURE: Connected to the relay server.\n");
 
 								SetTimeout(ns, param->DataTimeout);
 
