@@ -2959,6 +2959,7 @@ void ConnectionAccept(CONNECTION *c)
 	}
 	Unlock(c->Cedar->lock);
 	SLog2(c->Cedar, L"ConnectionAccept mode: %S %S %S", c->Name, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
+	SLog2(c->Cedar, L"ConnectionAccept ssl, up, pd, %S, %S, %S", s->SslVersion, s->UnderlayProtocol, s->ProtocolDetails);
 	{
 		char server_cert_hash_str[MAX_SIZE];
 		UCHAR server_cert_hash[SHA1_SIZE];
@@ -2966,9 +2967,17 @@ void ConnectionAccept(CONNECTION *c)
 		GetXDigest(s->RemoteX, server_cert_hash, true);
 		BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str), server_cert_hash, SHA1_SIZE);
 
-		SLog2(c->Cedar, L"ConnectionAccept:server_cert_hash_str %S", server_cert_hash_str);
+		SLog2(c->Cedar, L"ConnectionAccept:s->RemoteX %S", server_cert_hash_str);
 	}
+	{
+		char server_cert_hash_str[MAX_SIZE];
+		UCHAR server_cert_hash[SHA1_SIZE];
+		Zero(server_cert_hash, sizeof(server_cert_hash));
+		GetXDigest(s->LocalX, server_cert_hash, true);
+		BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str), server_cert_hash, SHA1_SIZE);
 
+		SLog2(c->Cedar, L"ConnectionAccept:s->LocalX %S", server_cert_hash_str);
+	}
 	// Start the SSL communication
 	Copy(&s->SslAcceptSettings, &c->Cedar->SslAcceptSettings, sizeof(SSL_ACCEPT_SETTINGS));
 	if (StartSSL(s, x, k) == false)
