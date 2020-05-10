@@ -2947,8 +2947,10 @@ void ConnectionAccept(CONNECTION *c)
 	// Specify the encryption algorithm
 	Lock(c->Cedar->lock);
 	{
+		SLog(c->Cedar, "set algo\n");
 		if (c->Cedar->CipherList != NULL)
 		{
+			SLog(c->Cedar, "c->Cedar->CipherList: %S\n", c->Cedar->CipherList);
 			SetWantToUseCipher(s, c->Cedar->CipherList);
 		}
 
@@ -2974,6 +2976,7 @@ void ConnectionAccept(CONNECTION *c)
 	FreeK(k);
 
 	SLog(c->Cedar, "LS_SSL_START", c->Name, s->CipherName);
+	SLog(c->Cedar, "ssl started\n");
 
 	Copy(c->CToken_Hash, ctoken_hash, SHA1_SIZE);
 

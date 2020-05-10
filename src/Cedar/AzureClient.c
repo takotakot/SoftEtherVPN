@@ -252,6 +252,7 @@ void AcMainThread(THREAD *thread, void *param)
 					UINT port = AZURE_SERVER_PORT;
 
 					Debug("VPN Azure: Connecting to %s...\n", st.CurrentAzureIp);
+					SLog(ac->Cedar, "AZURE: Connected to the relay server.\n");
 
 					if (ParseHostPort(st.CurrentAzureIp, &host, &port, AZURE_SERVER_PORT))
 					{
