@@ -96,7 +96,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 									// Check certification
 									char server_cert_hash_str[MAX_SIZE];
 									UCHAR server_cert_hash[SHA1_SIZE];
-									SLog2(ac->Cedar, L"AcWaitForRequest:StartSSLEx %S %S", ns->SecureMode ? "SecureMode" : "NOTSecureMode", ns->ServerMode ? "Server" : "Client");
+									SLog2(ac->Cedar, L"AcWaitForRequest:StartSSLEx done %S %S %S", ns->CipherName, ns->SecureMode ? "SecureMode" : "NOTSecureMode", ns->ServerMode ? "Server" : "Client");
 
 									Zero(server_cert_hash, sizeof(server_cert_hash));
 									GetXDigest(ns->RemoteX, server_cert_hash, true);

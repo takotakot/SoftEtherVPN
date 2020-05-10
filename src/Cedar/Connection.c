@@ -2959,6 +2959,15 @@ void ConnectionAccept(CONNECTION *c)
 	}
 	Unlock(c->Cedar->lock);
 	SLog2(c->Cedar, L"ConnectionAccept mode: %S %S %S", c->Name, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
+	{
+		char server_cert_hash_str[MAX_SIZE];
+		UCHAR server_cert_hash[SHA1_SIZE];
+		Zero(server_cert_hash, sizeof(server_cert_hash));
+		GetXDigest(c->RemoteX, server_cert_hash, true);
+		BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str), server_cert_hash, SHA1_SIZE);
+
+		SLog2(c->Cedar, L"ConnectionAccept:server_cert_hash_str %S", server_cert_hash_str);
+	}
 
 	// Start the SSL communication
 	Copy(&s->SslAcceptSettings, &c->Cedar->SslAcceptSettings, sizeof(SSL_ACCEPT_SETTINGS));
@@ -2967,6 +2976,7 @@ void ConnectionAccept(CONNECTION *c)
 		// Failed
 		AddNoSsl(c->Cedar, &s->RemoteIP);
 		Debug("ConnectionAccept(): StartSSL() failed\n");
+		SLog2(c->Cedar, L"ConnectionAccept(): StartSSL() failed");
 		FreeX(x);
 		FreeK(k);
 
@@ -2977,7 +2987,7 @@ void ConnectionAccept(CONNECTION *c)
 	FreeK(k);
 
 	SLog(c->Cedar, "LS_SSL_START", c->Name, s->CipherName);
-	SLog2(c->Cedar, L"ConnectionAccept SSL start with: %S %S", c->Name, s->CipherName);
+	SLog2(c->Cedar, L"ConnectionAccept SSL start with: %S %S %S %S", c->Name, s->CipherName, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
 
 	Copy(c->CToken_Hash, ctoken_hash, SHA1_SIZE);
 
@@ -2986,9 +2996,11 @@ void ConnectionAccept(CONNECTION *c)
 	{
 		// Failed
 		Debug("ConnectionAccept(): ServerAccept() failed with error %u\n", c->Err);
+		SLog2(c->Cedar, L"ConnectionAccept(): ServerAccept() failed with error %u", c->Err);
 	}
 
 FINAL:
+	SLog2(c->Cedar, L"ConnectionAccept Final");
 	if (c->flag1 == false)
 	{
 		Debug("%s %u c->flag1 == false\n", __FILE__, __LINE__);
