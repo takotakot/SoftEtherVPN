@@ -2997,6 +2997,7 @@ void ConnectionAccept(CONNECTION *c)
 
 	SLog(c->Cedar, "LS_SSL_START", c->Name, s->CipherName);
 	SLog2(c->Cedar, L"ConnectionAccept SSL start with: %S %S %S %S", c->Name, s->CipherName, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
+	SLog2(c->Cedar, L"ConnectionAccept s ssl, up, pd, %S, %S, %S", s->SslVersion, s->UnderlayProtocol, s->ProtocolDetails);
 
 	Copy(c->CToken_Hash, ctoken_hash, SHA1_SIZE);
 

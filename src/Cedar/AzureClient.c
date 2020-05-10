@@ -70,7 +70,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 							// Create new socket and connect VPN Azure Server
 							if (ac->DDnsStatusCopy.InternetSetting.ProxyType == PROXY_DIRECT)
 							{
-								SLog2(ac->Cedar, L"AcWaitForRequest: ConnextEx2 %u", AZURE_SERVER_PORT);
+								SLog2(ac->Cedar, L"AcWaitForRequest: ConnextEx2 %S %u", ac->DDnsStatusCopy.CurrentAzureIp, AZURE_SERVER_PORT);
 								ns = ConnectEx2(ac->DDnsStatusCopy.CurrentAzureIp, AZURE_SERVER_PORT,
 									0, (bool *)&ac->Halt);
 							}
@@ -88,6 +88,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 							{
 								Debug("Connected to the relay server.\n");
 								SLog2(ac->Cedar, L"AcWaitForRequest: Connected to the relay server.");
+								SLog2(ac->Cedar, L"AcWaitForRequest: ns = CEx2 ssl, up, pd, %S, %S, %S", ns->SslVersion, ns->UnderlayProtocol, ns->ProtocolDetails);
 
 								SetTimeout(ns, param->DataTimeout);
 
@@ -198,6 +199,7 @@ void AcMainThread(THREAD *thread, void *param)
 	{
 		return;
 	}
+	SLog2(ac->cedar, L"AcMainThread Start");
 
 	while (ac->Halt == false)
 	{
@@ -272,20 +274,20 @@ void AcMainThread(THREAD *thread, void *param)
 					UINT port = AZURE_SERVER_PORT;
 
 					Debug("VPN Azure: Connecting to %s...\n", st.CurrentAzureIp);
-					SLog2(ac->Cedar, L"AZURE: VPN Azure: Connecting to %S...", st.CurrentAzureIp);
+					SLog2(ac->Cedar, L"AcMainThread: VPN Azure: Connecting to %S...", st.CurrentAzureIp);
 
 					if (ParseHostPort(st.CurrentAzureIp, &host, &port, AZURE_SERVER_PORT))
 					{
 						if (st.InternetSetting.ProxyType == PROXY_DIRECT)
 						{
-							SLog2(ac->Cedar, L"AZURE: ConnectEx2 %S, %u", host, port);
+							SLog2(ac->Cedar, L"AcMainThread: ConnectEx2 %S, %u", host, port);
 							s = ConnectEx2(host, port, 0, (bool *)&ac->Halt);
 						}
 						else
 						{
 							s = WpcSockConnect2(host, port, &st.InternetSetting, NULL, AZURE_VIA_PROXY_TIMEOUT);
 						}
-						SLog2(ac->Cedar, L"AcMainThread: ConnectEx2 called", st.CurrentAzureIp);
+						SLog2(ac->Cedar, L"AcMainThread: ConnectEx2 called %S", st.CurrentAzureIp);
 
 						if (s != NULL)
 						{
@@ -363,6 +365,7 @@ void AcMainThread(THREAD *thread, void *param)
 								PackAddStr(p, "CurrentAzureIp", st.CurrentAzureIp);
 								PackAddInt64(p, "CurrentAzureTimestamp", st.CurrentAzureTimestamp);
 								PackAddStr(p, "CurrentAzureSignature", st.CurrentAzureSignature);
+								SLog2(ac->Cedar, L"AcMainThread: host, ip, ts, sgn %S %S %u %S", st.CurrentHostName, st.CurrentAzureIp, st.CurrentAzureTimestamp, st.CurrentAzureSignature);
 
 								Lock(ac->Lock);
 								{
@@ -593,6 +596,7 @@ AZURE_CLIENT *NewAzureClient(CEDAR *cedar, SERVER *server)
 	{
 		return NULL;
 	}
+	SLog2(cedar, L"NewAzureClient randomkey %S", server->MyRandomKey);
 
 	ac = ZeroMalloc(sizeof(AZURE_CLIENT));
 
