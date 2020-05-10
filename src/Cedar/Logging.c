@@ -529,6 +529,28 @@ void SLog2(CEDAR *c, wchar_t *name, ...)
 	va_end(args);
 }
 
+void SLog3(wchar_t *name, ...)
+{
+	wchar_t buf[MAX_SIZE * 2];
+	va_list args;
+	// Validate arguments
+	if (name == NULL)
+	{
+		return;
+	}
+
+	va_start(args, name);
+	UniFormatArgs(buf, sizeof(buf), name, args);
+
+	// WriteServerLog(c, buf);
+	FILE *fp;
+	if ((fp = fopen("/usr/local/vpnserver/debug.log", "a")) != NULL) {
+		int i = fwprintf(fp, buf);
+	}
+	fclose(fp);
+	va_end(args);
+}
+
 // Client log
 void CLog(CLIENT *c, char *name, ...)
 {
