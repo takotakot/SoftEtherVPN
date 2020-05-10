@@ -263,13 +263,14 @@ void AcMainThread(THREAD *thread, void *param)
 					{
 						if (st.InternetSetting.ProxyType == PROXY_DIRECT)
 						{
-							SLog2(ac->Cedar, L"AZURE: ConnectEx2\n");
+							SLog2(ac->Cedar, L"AZURE: ConnectEx2 %S, %u", host, port);
 							s = ConnectEx2(host, port, 0, (bool *)&ac->Halt);
 						}
 						else
 						{
 							s = WpcSockConnect2(host, port, &st.InternetSetting, NULL, AZURE_VIA_PROXY_TIMEOUT);
 						}
+						SLog2(ac->Cedar, L"AcMainThread: ConnectEx2 called", st.CurrentAzureIp);
 
 						if (s != NULL)
 						{
@@ -277,7 +278,17 @@ void AcMainThread(THREAD *thread, void *param)
 							UINT64 established_tick = 0;
 
 							Debug("VPN Azure: Connected.\n");
-							SLog2(ac->Cedar, L"AZURE: VPN Azure: Connected.");
+							{
+								char server_cert_hash_str[MAX_SIZE];
+								UCHAR server_cert_hash[SHA1_SIZE];
+								Zero(server_cert_hash, sizeof(server_cert_hash));
+								GetXDigest(s->RemoteX, server_cert_hash, true);
+								BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str), server_cert_hash, SHA1_SIZE);
+
+								SLog2(ac->Cedar, L"ConnectionAccept:server_cert_hash_str %S", server_cert_hash_str);
+							}
+							SLog2(ac->Cedar, L"AcMainThread ConnectEx2 End: %S %S %S", ac->Cedar->CipherList, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
+
 
 							SetTimeout(s, AZURE_PROTOCOL_CONTROL_TIMEOUT_DEFAULT);
 
