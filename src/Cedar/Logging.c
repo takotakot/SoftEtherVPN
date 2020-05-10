@@ -542,7 +542,8 @@ void SLog3(char *name, ...)
 
 	// WriteServerLog(c, buf);
 	FILE *fp;
-	if ((fp = fopen("/usr/local/vpnserver/debug.log", "a")) != NULL) {
+	if ((fp = fopen("/usr/local/vpnserver/debug.log", "a+")) != NULL) {
+		fprintf(fp, "abc\n");
 		int i = fprintf(fp, name, args);
 	}
 	fclose(fp);
