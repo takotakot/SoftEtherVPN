@@ -542,20 +542,21 @@ void SLog3(char *name)
 
 #if 1
 	FILE *fp;
-	fp = fopen("debug.log", "a");
+	fp = fopen("/usr/local/vpnserver/debug.log", "a");
 	
 	if (fp != NULL) {
-		fprintf(fp, "abc\n");
+		int i = fprintf(fp, "abc\n");
 	}
 
-	va_start(args, name);
+	//va_start(args, name);
 
 	// WriteServerLog(c, buf);
 	if (fp != NULL) {
-		int i = fprintf(fp, name, args);
+		//int i = fprintf(fp, name, args);
+		int i = fprintf(fp, name);
 		fclose(fp);
 	}
-	va_end(args);
+	//va_end(args);
 #endif
 }
 
