@@ -75,6 +75,7 @@ void CheckNetworkListenThread(THREAD *thread, void *param)
 
 	// Set RSA bits considering OpenSSL security Level
 	// Security level 4 needs 7680 bits
+	Debug("seclevel: %d\n", GetOSSecurityLevel());
 	switch (GetOSSecurityLevel())
 	{
 	case 2:

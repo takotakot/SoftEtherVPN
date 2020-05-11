@@ -11879,7 +11879,7 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 	}
 
 	ssl_ctx = NewSSLCtx(sock->ServerMode);
-	SLog3("STartSSLEx: ssl_ctx get\n");
+	SLog3("STartSSLEx: ssl_ctx get sec:%d\n", SSL_CTX_get_security_level(ssl_ctx));
 
 	Lock(openssl_lock);
 	{
@@ -11927,20 +11927,22 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 		}else{
 			SLog3("STartSSLEx: I'm client. %d\n", __LINE__);
 		}
+		SLog3("StartSSLEx: OS security level %d\n", GetOSSecurityLevel());
 
 		SLog3("STartSSLEx: Default ctx security level %d\n", SSL_CTX_get_security_level(ssl_ctx));
 
-		SSL_CTX_set_security_level(ssl_ctx, 3);
+//		SSL_CTX_set_security_level(ssl_ctx, 3);
 
 		SLog3("STartSSLEx: settled ctx security level %d\n", SSL_CTX_get_security_level(ssl_ctx));
 
 		sock->ssl = SSL_new(ssl_ctx);
 
 		SLog3("STartSSLEx: SSL conn default security level %d\n", SSL_get_security_level(sock->ssl));
-		SSL_set_security_level(sock->ssl, 3);
+//		SSL_set_security_level(sock->ssl, 3);
 		SLog3("STartSSLEx: SSL conn security level %d\n", SSL_get_security_level(sock->ssl));
 
 		SSL_set_fd(sock->ssl, (int)sock->socket);
+		SLog3("STartSSLEx: SSL conn security level %d\n", SSL_get_security_level(sock->ssl));
 
 #ifdef	SSL_CTRL_SET_TLSEXT_HOSTNAME
 		if (sock->ServerMode == false)
@@ -12061,7 +12063,8 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 		if (SSL_connect(sock->ssl) <= 0)
 		{
 			// not come here
-			SLog3("STartSSLEx: I'm client: %d\n", __LINE__);
+			SLog3("STartSSLEx: I'm client FAILED!!: %d\n", __LINE__);
+			SLog3("STartSSLEx: SSL conn security level %d\n", SSL_get_security_level(sock->ssl));
 			Unlock(ssl_connect_lock);
 			// SSL-connect failure
 			Lock(openssl_lock);
@@ -12077,7 +12080,8 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 			FreeSSLCtx(ssl_ctx);
 			return false;
 		}
-		SLog3("STartSSLEx: I'm client connected: %d\n", __LINE__);
+		SLog3("STartSSLEx: I'm client connected!!: %d\n", __LINE__);
+		SLog3("STartSSLEx: SSL conn security level %d\n", SSL_get_security_level(sock->ssl));
 		Unlock(ssl_connect_lock);
 		SetTimeout(sock, prev_timeout);
 	}
@@ -16635,10 +16639,12 @@ DH *TmpDhCallback(SSL *ssl, int is_export, int keylength)
 struct ssl_ctx_st *NewSSLCtx(bool server_mode)
 {
 	struct ssl_ctx_st *ctx = SSL_CTX_new(SSLv23_method());
+	SLog3("NewSSLCtx: line:%d lv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
 
 #ifdef	SSL_OP_NO_TICKET
 	SSL_CTX_set_options(ctx, SSL_OP_NO_TICKET);
 #endif	// SSL_OP_NO_TICKET
+	SLog3("NewSSLCtx: line:%d lv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
 
 #ifdef	SSL_OP_CIPHER_SERVER_PREFERENCE
 	if (server_mode)
@@ -16648,11 +16654,14 @@ struct ssl_ctx_st *NewSSLCtx(bool server_mode)
 #endif	// SSL_OP_CIPHER_SERVER_PREFERENCE
 
 	SSL_CTX_set_tmp_dh_callback(ctx, TmpDhCallback);
+	SLog3("NewSSLCtx: line:%d lv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
 
 #ifdef	SSL_CTX_set_ecdh_auto
 	SSL_CTX_set_ecdh_auto(ctx, 1);
 #endif	// SSL_CTX_set_ecdh_auto
 
+	SLog3("NewSSLCtx: line:%d curlv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
+// security level increase below
 	if (server_mode)
 	{
 		SSL_CTX_set_ssl_version(ctx, SSLv23_server_method());
@@ -16661,10 +16670,13 @@ struct ssl_ctx_st *NewSSLCtx(bool server_mode)
 	{
 		SSL_CTX_set_ssl_version(ctx, SSLv23_client_method());
 	}
+// security level increase above
+	SLog3("NewSSLCtx: line:%d inclv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
 
 #ifdef	SSL_OP_NO_SSLv3
 	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv3);
 #endif	// SSL_OP_NO_SSLv3
+	SLog3("NewSSLCtx: line:%d lv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
 
 	return ctx;
 }
