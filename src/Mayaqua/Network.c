@@ -11833,6 +11833,7 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 	SOCKET_TIMEOUT_PARAM *ttparam;
 #endif //UNIX_SOLARIS
 
+	SLog3("STartSSLEx\n");
 	// Validate arguments
 	if (sock == NULL)
 	{
@@ -11862,6 +11863,7 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 
 	if (sock->SecureMode)
 	{
+		SLog3("STartSSLEx: Secure done\n");
 		//Debug("StartSSL Error: #3\n");
 		// SSL communication has already started
 		return true;
@@ -11877,6 +11879,7 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 	}
 
 	ssl_ctx = NewSSLCtx(sock->ServerMode);
+	SLog3("STartSSLEx: ssl_ctx get\n");
 
 	Lock(openssl_lock);
 	{
@@ -11920,9 +11923,23 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 			Unlock(openssl_lock);
 			AddChainSslCertOnDirectory(ssl_ctx);
 			Lock(openssl_lock);
+			SLog3("STartSSLEx: I'm server.\n");
+		}else{
+			SLog3("STartSSLEx: I'm client. %d\n", __LINE__);
 		}
 
+		SLog3("STartSSLEx: Default ctx security level %d\n", SSL_CTX_get_security_level(ssl_ctx));
+
+		SSL_CTX_set_security_level(ssl_ctx, 3);
+
+		SLog3("STartSSLEx: settled ctx security level %d\n", SSL_CTX_get_security_level(ssl_ctx));
+
 		sock->ssl = SSL_new(ssl_ctx);
+
+		SLog3("STartSSLEx: SSL conn default security level %d\n", SSL_get_security_level(sock->ssl));
+		SSL_set_security_level(sock->ssl, 3);
+		SLog3("STartSSLEx: SSL conn security level %d\n", SSL_get_security_level(sock->ssl));
+
 		SSL_set_fd(sock->ssl, (int)sock->socket);
 
 #ifdef	SSL_CTRL_SET_TLSEXT_HOSTNAME
@@ -11931,7 +11948,11 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 			if (IsEmptyStr(sni_hostname) == false)
 			{
 				// Set the SNI host name
+				SLog3("STartSSLEx: set sni\n");
 				SSL_set_tlsext_host_name(sock->ssl, sni_hostname);
+			}else
+			{
+				SLog3("STartSSLEx: NOT sni\n");
 			}
 		}
 #endif	// SSL_CTRL_SET_TLSEXT_HOSTNAME
@@ -11941,6 +11962,7 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 
 	if (x != NULL)
 	{
+		SLog3("STartSSLEx: x not NULL\n");
 		// Check the certificate and the private key
 		if (CheckXandK(x, priv))
 		{
@@ -11959,11 +11981,15 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 
 	if (sock->WaitToUseCipher != NULL)
 	{
+		SLog3("STartSSLEx: waittousecipher not null\n");
 		// Set the cipher algorithm name to want to use
 		Lock(openssl_lock);
 		{
-			if (SSL_set_cipher_list(sock->ssl, sock->WaitToUseCipher) == 0)
+			SLog3("STartSSLEx: cipher list %s\n", sock->WaitToUseCipher);
+			if (SSL_set_cipher_list(sock->ssl, sock->WaitToUseCipher) == 0) {
+				SLog3("STartSSLEx: cipher list %s -> \n", sock->WaitToUseCipher, DEFAULT_CIPHER_LIST);
 				SSL_set_cipher_list(sock->ssl, DEFAULT_CIPHER_LIST);
+			}
 		}
 		Unlock(openssl_lock);
 	}
@@ -12022,15 +12048,20 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 #endif // UNIX_SOLARIS
 
 		//		Unlock(ssl_connect_lock);
+		SLog3("STartSSLEx: I'm server: %d\n", __LINE__);
 	}
 	else
 	{
+		SLog3("STartSSLEx: I'm client: %d\n", __LINE__);
+
 		prev_timeout = GetTimeout(sock);
 		SetTimeout(sock, ssl_timeout);
 		Lock(ssl_connect_lock);
 		// Client mode
 		if (SSL_connect(sock->ssl) <= 0)
 		{
+			// not come here
+			SLog3("STartSSLEx: I'm client: %d\n", __LINE__);
 			Unlock(ssl_connect_lock);
 			// SSL-connect failure
 			Lock(openssl_lock);
@@ -12046,12 +12077,14 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 			FreeSSLCtx(ssl_ctx);
 			return false;
 		}
+		SLog3("STartSSLEx: I'm client connected: %d\n", __LINE__);
 		Unlock(ssl_connect_lock);
 		SetTimeout(sock, prev_timeout);
 	}
 
 	// SSL communication is initiated
 	sock->SecureMode = true;
+	SLog3("STartSSLEx: got secure!: %d\n", __LINE__);
 
 	// Get the certificate of the remote host
 	Lock(openssl_lock);
@@ -12061,6 +12094,8 @@ bool StartSSLEx(SOCK *sock, X *x, K *priv, UINT ssl_timeout, char *sni_hostname)
 		sock->SslVersion = SSL_get_version(sock->ssl);
 	}
 	Unlock(openssl_lock);
+	SLog3("STartSSLEx: version %s\n", sock->SslVersion);
+
 
 	if (x509 == NULL)
 	{
@@ -14078,9 +14113,9 @@ SOCK *ConnectEx(char *hostname, UINT port, UINT timeout)
 }
 SOCK *ConnectEx2(char *hostname, UINT port, UINT timeout, bool *cancel_flag)
 {
-	SLog3("ConnectEx2: %d\n", 123);
+	//SLog3("ConnectEx2: %d\n", 123);
 	//SLog3("ConnectEx2\n");
-	//SLog3("ConnectEx2: %s:%u\n", hostname, port);
+	SLog3("ConnectEx2: %s:%u\n", hostname, port);
 	return ConnectEx3(hostname, port, timeout, cancel_flag, NULL, NULL, false, true);
 }
 SOCK *ConnectEx3(char *hostname, UINT port, UINT timeout, bool *cancel_flag, char *nat_t_svc_name, UINT *nat_t_error_code, bool try_start_ssl, bool no_get_hostname)
@@ -14108,7 +14143,7 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 	IP dummy_ret_ip;
 
 	//SLog3("CEx4\n");
-	//SLog3("ConnectEx4: %s %d %s %s\n", hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
+	SLog3("ConnectEx4 begin: %s %d %s %s\n", hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
 	// Validate arguments
 	if (hostname == NULL || port == 0 || port >= 65536 || IsEmptyStr(hostname))
 	{
@@ -14137,9 +14172,12 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 	StrCpy(hostname_original, sizeof(hostname_original), hostname);
 
 	use_natt = (IsEmptyStr(nat_t_svc_name) ? false : true);
+	SLog3("natt: %s\n", use_natt ? "natt" : "NOTnatt");
 
 	if (use_natt)
 	{
+		SLog3("ConnectEx4 l%d: %s %d %s %s\n", __LINE__, hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
+
 		// In case of using NAT-T, split host name if the '/' is included in the host name
 		UINT i = SearchStrEx(hostname, "/", 0, false);
 
@@ -14172,6 +14210,8 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 	}
 	else
 	{
+		// almost here
+		SLog3("ConnectEx4 l%d: %s %d %s %s\n", __LINE__, hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
 		StrCpy(hostname_original, sizeof(hostname_original), hostname);
 	}
 
@@ -14182,6 +14222,7 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 
 	if (IsZeroIp(ret_ip) == false)
 	{
+		SLog3("ConnectEx4 l%d: zeroip false %s %d %s %s\n", __LINE__, hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
 		// Skip name resolution
 		if (IsIP6(ret_ip))
 		{
@@ -14196,9 +14237,11 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 	}
 	else
 	{
+		SLog3("ConnectEx4 l%d: zeroip %s %d %s %s\n", __LINE__, hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
 		// Forward resolution
 		if (GetIP46Ex(&ip4, &ip6, hostname_original, 0, cancel_flag) == false)
 		{
+			SLog3("ConnectEx4 l%d: return NULL %s %d %s %s\n", __LINE__, hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
 			return NULL;
 		}
 	}
@@ -14212,13 +14255,17 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 
 	s = INVALID_SOCKET;
 
+	SLog3("ConnectEx4 l%d: nextconnect %s %d %s %s\n", __LINE__, hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
+
 	// Attempt to connect with IPv4
 	if (IsZeroIp(&ip4) == false)
 	{
+		SLog3("ConnectEx4 l%d: connect %s %d %s %s\n", __LINE__, hostname, port, try_start_ssl ? "TrySsl" : "TryNoSsl", ret_ip);
 		if (use_natt == false)
 		{
 			//SLog3("CEx4\n");
-			SLog3("ConnectEx4 natt: %lu\n", __LINE__);
+//			SLog3("ConnectEx4 natt false: %d to %s:%d\n", __LINE__, ip4, port);
+			SLog3("ConnectEx4 natt false: %d to %d.%d.%d.%d:%d\n", __LINE__, (int)ip4.addr[0], (int)ip4.addr[1], (int)ip4.addr[2], (int)ip4.addr[3], port);
 			// Normal connection without using NAT-T
 			s = ConnectTimeoutIPv4(&ip4, port, timeout, cancel_flag);
 
@@ -14228,11 +14275,12 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 
 				Copy(ret_ip, &ip4, sizeof(IP));
 			}
+			SLog3("ConnectEx4 natt false DONE: %d\n", __LINE__);
 		}
 		else if (force_use_natt)
 		{
 			//SLog3("CEx4\n");
-			SLog3("ConnectEx4 fnatt: %u\n", __LINE__);
+			SLog3("ConnectEx4 fnatt: %d\n", __LINE__);
 			// The connection by forcing the use of NAT-T (not to connection with normal TCP)
 			SOCK *nat_t_sock = NewRUDPClientNatT(nat_t_svc_name, &ip4, nat_t_error_code, timeout, cancel_flag,
 				hint_str, hostname);
@@ -14244,13 +14292,14 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 			}
 
 			Copy(ret_ip, &ip4, sizeof(IP));
+			SLog3("ConnectEx4 fnatt DONE: %d\n", __LINE__);
 
 			return nat_t_sock;
 		}
 		else
 		{
 			//SLog3("CEx4\n");
-			SLog3("ConnectEx4 else: %u\n", __LINE__);
+			SLog3("ConnectEx4 else: %d\n", __LINE__);
 			// Use the connections using NAT-T with normal TCP connection together
 			// (Use multiple threads to try to connect in four connection methods concurrently)
 			CONNECT_TCP_RUDP_PARAM p1, p2, p3, p4;
@@ -14434,6 +14483,7 @@ SOCK *ConnectEx4(char *hostname, UINT port, UINT timeout, bool *cancel_flag, cha
 
 				return NULL;
 			}
+			SLog3("ConnectEx4 else FIN: %d\n", __LINE__);
 
 			if (p1.Ok)
 			{

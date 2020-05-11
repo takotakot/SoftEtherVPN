@@ -46,6 +46,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 				PackGetStr(p, "cipher_name", cipher_name, sizeof(cipher_name));
 				PackGetStr(p, "hostname", hostname, sizeof(hostname));
 				SLog2(ac->Cedar, L"AcWaitForRequest: opcode, cipher_name, hostname %S %S %S", opcode, cipher_name, hostname);
+				SLog3("AcWaitForRequest: opcode, cipher_name, hostname %s %s %s\n", opcode, cipher_name, hostname);
 
 				if (StrCmpi(opcode, "relay") == 0)
 				{
@@ -61,6 +62,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 						client_port = PackGetInt(p, "client_port");
 						server_port = PackGetInt(p, "server_port");
 						SLog2(ac->Cedar, L"AcWaitForRequest: sess %r %r:%u (srv %r:%u)", session_id, &client_ip, client_port, &server_ip, server_port);
+						SLog3("AcWaitForRequest: sess %s %s:%d (srv %s:%d)", session_id, &client_ip, client_port, &server_ip, server_port);
 
 						if (client_port != 0 && server_port != 0)
 						{
@@ -71,6 +73,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 							if (ac->DDnsStatusCopy.InternetSetting.ProxyType == PROXY_DIRECT)
 							{
 								SLog2(ac->Cedar, L"AcWaitForRequest: ConnextEx2 %S %u", ac->DDnsStatusCopy.CurrentAzureIp, AZURE_SERVER_PORT);
+								SLog3("AcWaitForRequest: ConnextEx2 %s %d", ac->DDnsStatusCopy.CurrentAzureIp, AZURE_SERVER_PORT);
 								ns = ConnectEx2(ac->DDnsStatusCopy.CurrentAzureIp, AZURE_SERVER_PORT,
 									0, (bool *)&ac->Halt);
 							}
@@ -89,6 +92,8 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 								Debug("Connected to the relay server.\n");
 								SLog2(ac->Cedar, L"AcWaitForRequest: Connected to the relay server.");
 								SLog2(ac->Cedar, L"AcWaitForRequest: ns = CEx2 ssl, up, pd, %S, %S, %S", ns->SslVersion, ns->UnderlayProtocol, ns->ProtocolDetails);
+								SLog3("AcWaitForRequest: Connected to the relay server.");
+								SLog3("AcWaitForRequest: ns = CEx2 ssl, up, pd, %s, %s, %s", ns->SslVersion, ns->UnderlayProtocol, ns->ProtocolDetails);
 
 								SetTimeout(ns, param->DataTimeout);
 
@@ -99,6 +104,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 										char server_cert_hash_str[MAX_SIZE];
 										UCHAR server_cert_hash[SHA1_SIZE];
 										SLog2(ac->Cedar, L"AcWaitForRequest:StartSSLEx done %S %S %S", ns->CipherName, ns->SecureMode ? "SecureMode" : "NOTSecureMode", ns->ServerMode ? "Server" : "Client");
+										SLog3("AcWaitForRequest:StartSSLEx done %s %s %s", ns->CipherName, ns->SecureMode ? "SecureMode" : "NOTSecureMode", ns->ServerMode ? "Server" : "Client");
 
 										Zero(server_cert_hash, sizeof(server_cert_hash));
 										GetXDigest(ns->LocalX, server_cert_hash, true);
@@ -106,11 +112,13 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 										BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str),
 											server_cert_hash, SHA1_SIZE);
 										SLog2(ac->Cedar, L"AcWaitForRequest:ns->LocalX %S", server_cert_hash_str);
+										SLog3("AcWaitForRequest:ns->LocalX %s", server_cert_hash_str);
 									}
 									// Check certification
 									char server_cert_hash_str[MAX_SIZE];
 									UCHAR server_cert_hash[SHA1_SIZE];
 									SLog2(ac->Cedar, L"AcWaitForRequest:StartSSLEx done %S %S %S", ns->CipherName, ns->SecureMode ? "SecureMode" : "NOTSecureMode", ns->ServerMode ? "Server" : "Client");
+									SLog3("AcWaitForRequest:StartSSLEx done %s %s %s", ns->CipherName, ns->SecureMode ? "SecureMode" : "NOTSecureMode", ns->ServerMode ? "Server" : "Client");
 
 									Zero(server_cert_hash, sizeof(server_cert_hash));
 									GetXDigest(ns->RemoteX, server_cert_hash, true);
@@ -118,8 +126,10 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 									BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str),
 										server_cert_hash, SHA1_SIZE);
 									SLog2(ac->Cedar, L"AcWaitForRequest:server_cert_hash_str %S", server_cert_hash_str);
-
 									SLog2(ac->Cedar, L"ConnectionAccept ssl, up, pd, %S, %S, %S", ns->SslVersion, ns->UnderlayProtocol, ns->ProtocolDetails);
+
+									SLog3("AcWaitForRequest:server_cert_hash_str %s", server_cert_hash_str);
+									SLog3("ConnectionAccept ssl, up, pd, %s, %s, %s", ns->SslVersion, ns->UnderlayProtocol, ns->ProtocolDetails);
 
 									if (IsEmptyStr(ac->DDnsStatusCopy.AzureCertHash) || StrCmpi(server_cert_hash_str, ac->DDnsStatusCopy.AzureCertHash) == 0
 										 || StrCmpi(server_cert_hash_str, ac->DDnsStatus.AzureCertHash) == 0)
@@ -140,6 +150,7 @@ void AcWaitForRequest(AZURE_CLIENT *ac, SOCK *s, AZURE_PARAM *param)
 													if (uc != 0)
 													{
 														SLog2(ac->Cedar, L"AcWaitForRequest:GetReverseListeningSock");
+														SLog3("AcWaitForRequest:GetReverseListeningSock");
 														SOCK *accept_sock = GetReverseListeningSock(ac->Cedar);
 
 														if (accept_sock != NULL)
@@ -200,6 +211,7 @@ void AcMainThread(THREAD *thread, void *param)
 		return;
 	}
 	SLog2(ac->Cedar, L"AcMainThread Start");
+	SLog3("AcMainThread Start\n");
 
 	while (ac->Halt == false)
 	{
@@ -281,6 +293,7 @@ void AcMainThread(THREAD *thread, void *param)
 						if (st.InternetSetting.ProxyType == PROXY_DIRECT)
 						{
 							SLog2(ac->Cedar, L"AcMainThread: ConnectEx2 %S, %u", host, port);
+							SLog3("AcMainThread: ConnectEx2 %s, %d", host, port);
 							s = ConnectEx2(host, port, 0, (bool *)&ac->Halt);
 						}
 						else
@@ -288,6 +301,7 @@ void AcMainThread(THREAD *thread, void *param)
 							s = WpcSockConnect2(host, port, &st.InternetSetting, NULL, AZURE_VIA_PROXY_TIMEOUT);
 						}
 						SLog2(ac->Cedar, L"AcMainThread: ConnectEx2 called %S", st.CurrentAzureIp);
+						SLog3("AcMainThread: ConnectEx2 called %s", st.CurrentAzureIp);
 
 						if (s != NULL)
 						{
@@ -312,11 +326,13 @@ void AcMainThread(THREAD *thread, void *param)
 								BinToStr(server_cert_hash_str, sizeof(server_cert_hash_str), server_cert_hash, SHA1_SIZE);
 
 								SLog2(ac->Cedar, L"AcMainThread s->LocalX %S", server_cert_hash_str);
-								SLog3("ConnectEx2\n");
+								//SLog3("ConnectEx2\n");
 							}
 							SLog2(ac->Cedar, L"AcMainThread ConnectEx2 End: %S %S %S", ac->Cedar->CipherList, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
 							SLog2(ac->Cedar, L"AcMainThread ssl, up, pd, %S, %S, %S", s->SslVersion, s->UnderlayProtocol, s->ProtocolDetails);
-
+// Connected but not SSL
+							SLog3("AcMainThread%d ConnectEx2 End: %s %s %s", __LINE__, ac->Cedar->CipherList, s->SecureMode ? "SecureMode" : "NOTSecureMode", s->ServerMode ? "Server" : "Client");
+							SLog3("AcMainThread%d ssl, up, pd, %s, %s, %s", __LINE__, s->SslVersion, s->UnderlayProtocol, s->ProtocolDetails);
 
 							SetTimeout(s, AZURE_PROTOCOL_CONTROL_TIMEOUT_DEFAULT);
 
@@ -367,6 +383,7 @@ void AcMainThread(THREAD *thread, void *param)
 								PackAddInt64(p, "CurrentAzureTimestamp", st.CurrentAzureTimestamp);
 								PackAddStr(p, "CurrentAzureSignature", st.CurrentAzureSignature);
 								SLog2(ac->Cedar, L"AcMainThread: host, ip, ts, sgn %S %S %u %S", st.CurrentHostName, st.CurrentAzureIp, st.CurrentAzureTimestamp, st.CurrentAzureSignature);
+								SLog3("AcMainThread: host, ip, ts, sgn %s %s %d %s", st.CurrentHostName, st.CurrentAzureIp, st.CurrentAzureTimestamp, st.CurrentAzureSignature);
 
 								Lock(ac->Lock);
 								{
@@ -598,6 +615,7 @@ AZURE_CLIENT *NewAzureClient(CEDAR *cedar, SERVER *server)
 		return NULL;
 	}
 	SLog2(cedar, L"NewAzureClient randomkey %S", server->MyRandomKey);
+	SLog3("NewAzureClient randomkey");
 
 	ac = ZeroMalloc(sizeof(AZURE_CLIENT));
 

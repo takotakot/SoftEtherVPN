@@ -1107,6 +1107,7 @@ void SLog3(char *name, ...)
 	fp = fopen("/usr/local/vpnserver/debug.log", "a");
 
 	if (fp != NULL) {
+		i = vfprintf(fp, "%p\n", pthread_self());
 //			i = fprintf(fp, "abc\n");
 			//fclose(fp);
 //		i = fprintf(fp, "abc%d", 123);
