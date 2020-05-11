@@ -1080,5 +1080,49 @@ void PrintDebugInformation()
 }
 
 
+void SLog3(char *name, ...)
+{
+		va_list args;
+		int i;
+		// Validate arguments
+		if (name == NULL)
+		{
+				return;
+		}
+		//return;
+#if 0
+		IO *io;
+		io = FileOpenW(L"/usr/local/vpnserver/debug.log", true);
+
+		if (FileWrite(io, "name", strlen("name")) == false)
+		{
+				FileCloseEx(io, true);
+				// If it fails to write to the file,
+				// erase the buffer and give up
+				ClearBuf(buffer);
+				io = NULL;
+		}
+#else
+		FILE *fp;
+		fp = fopen("/usr/local/vpnserver/debug.log", "a");
+
+		if (fp != NULL) {
+				i = fprintf(fp, "abc\n");
+				//fclose(fp);
+		}
+		//return;
+
+		va_start(args, name);
+
+		// WriteServerLog(c, buf);
+		if (fp != NULL) {
+				i = fprintf(fp, name, args);
+				//int i = fprintf(fp, name);
+				fclose(fp);
+		}
+		va_end(args);
+#endif
+		return;
+}
 
 
