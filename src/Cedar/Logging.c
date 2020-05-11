@@ -537,6 +537,7 @@ void SLog3(char *name)
 	{
 		return;
 	}
+#if 0
 	IO *io;
 	io = FileOpenW(L"/usr/local/vpnserver/debug.log", true);
 
@@ -548,7 +549,7 @@ void SLog3(char *name)
 		ClearBuf(buffer);
 		io = NULL;
 	}
-#if 0
+#else
 	FILE *fp;
 	fp = fopen("/usr/local/vpnserver/debug.log", "a");
 	
