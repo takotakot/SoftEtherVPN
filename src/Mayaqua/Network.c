@@ -16641,6 +16641,27 @@ struct ssl_ctx_st *NewSSLCtx(bool server_mode)
 	struct ssl_ctx_st *ctx = SSL_CTX_new(SSLv23_method());
 	SLog3("NewSSLCtx: line:%d lv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
 
+	SLog3("NewSSLCtx: line:%d curlv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
+// security level increase below
+	if (server_mode)
+	{
+		SSL_CTX_set_ssl_version(ctx, SSLv23_server_method());
+	}
+	else
+	{
+		int i;
+		i = SSL_CTX_set_ssl_version(ctx, SSLv23_client_method());
+		SLog3("NewSSLCtx: line:%d set ssl ver: %d", __LINE__, i);
+	}
+// security level increase above
+	SLog3("NewSSLCtx: line:%d inclv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
+
+#ifdef	SSL_OP_NO_SSLv3
+	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv3);
+#endif	// SSL_OP_NO_SSLv3
+	SLog3("NewSSLCtx: line:%d lv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
+
+
 #ifdef	SSL_OP_NO_TICKET
 	SSL_CTX_set_options(ctx, SSL_OP_NO_TICKET);
 #endif	// SSL_OP_NO_TICKET
@@ -16659,24 +16680,6 @@ struct ssl_ctx_st *NewSSLCtx(bool server_mode)
 #ifdef	SSL_CTX_set_ecdh_auto
 	SSL_CTX_set_ecdh_auto(ctx, 1);
 #endif	// SSL_CTX_set_ecdh_auto
-
-	SLog3("NewSSLCtx: line:%d curlv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
-// security level increase below
-	if (server_mode)
-	{
-		SSL_CTX_set_ssl_version(ctx, SSLv23_server_method());
-	}
-	else
-	{
-		SSL_CTX_set_ssl_version(ctx, SSLv23_client_method());
-	}
-// security level increase above
-	SLog3("NewSSLCtx: line:%d inclv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
-
-#ifdef	SSL_OP_NO_SSLv3
-	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv3);
-#endif	// SSL_OP_NO_SSLv3
-	SLog3("NewSSLCtx: line:%d lv: %d", __LINE__, SSL_CTX_get_security_level(ctx));
 
 	return ctx;
 }
